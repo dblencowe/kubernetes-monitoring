@@ -6,14 +6,17 @@ import (
 	"fmt"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"log"
 	"os"
+	"strconv"
 )
 
 type Configuration struct {
 	kubeConfigPath string
 	format         string
+	isInCluster    bool
 }
 
 type Output struct {
@@ -38,21 +41,42 @@ func configure() (config Configuration) {
 	}
 	config.kubeConfigPath = kubeConfigPath
 	config.format, _ = getenv("OUTPUT_FORMAT", "json")
+	isInCluster, _ := getenv("IN_CLUSTER", "false")
+	config.isInCluster, _ = strconv.ParseBool(isInCluster)
 	return
+}
+
+func makeConfigFile(config Configuration) *rest.Config {
+	if config.isInCluster {
+		clientConfig, err := rest.InClusterConfig()
+		if err != nil {
+			panic(err.Error())
+		}
+		return clientConfig
+	}
+
+	clientConfig, err := clientcmd.BuildConfigFromFlags("", config.kubeConfigPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return clientConfig
+}
+
+func buildKubeClient(clientConfig *rest.Config) *kubernetes.Clientset {
+	clientset, err := kubernetes.NewForConfig(clientConfig)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	return clientset
 }
 
 func main() {
 	config := configure()
-	kubeConfig, err := clientcmd.BuildConfigFromFlags("", config.kubeConfigPath)
-	if err != nil {
-		log.Fatal(err)
-	}
-	clientset, err := kubernetes.NewForConfig(kubeConfig)
-	if err != nil {
-		log.Fatal(err)
-	}
+	clientConfig := makeConfigFile(config)
+	client := buildKubeClient(clientConfig)
 
-	pods, err := clientset.CoreV1().Pods("").List(context.TODO(), metav1.ListOptions{})
+	pods, err := client.CoreV1().Pods("").List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		panic(err.Error())
 	}

@@ -16,7 +16,8 @@ KUBECONFIG=/Users/you/.kube/config ./kubernetes monitoring
 ```
 
 ## Configuration
-|Variable| Values |Description|
-|--------|--------|-----------|
-|KUBECONFIG| <>     |The path to your KUBECONFIG file|
-|OUTPUT_FORMAT| json / text | Output as JSON or Human Friendly|   
+| Variable      | Values           | Description                     |
+|---------------|------------------|---------------------------------|
+| KUBECONFIG    | <>               | The path to your KUBECONFIG file |
+| OUTPUT_FORMAT | json / text      | Output as JSON or Human Friendly |
+| IN_CLUSTER    | "TRUE" / "FALSE" | Set to false to use KUBECONFIG  |
