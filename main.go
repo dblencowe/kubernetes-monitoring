@@ -84,9 +84,6 @@ func main() {
 	if config.format == "json" {
 		names := make([]string, 0)
 		for _, pod := range pods.Items {
-			if len(pod.GetName()) == 0 {
-				continue
-			}
 			names = append(names, pod.GetName())
 		}
 		output := Output{len(pods.Items), names}
