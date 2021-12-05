@@ -14,3 +14,9 @@ install your Golang development environment and run the following commands
 go build
 KUBECONFIG=/Users/you/.kube/config ./kubernetes monitoring
 ```
+
+## Configuration
+|Variable| Values |Description|
+|--------|--------|-----------|
+|KUBECONFIG| <>     |The path to your KUBECONFIG file|
+|OUTPUT_FORMAT| json / text | Output as JSON or Human Friendly|   

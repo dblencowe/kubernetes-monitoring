@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -13,6 +14,11 @@ import (
 type Configuration struct {
 	kubeConfigPath string
 	format         string
+}
+
+type Output struct {
+	TotalCount int      `json:"totalCount"`
+	PodList    []string `json:"podList"`
 }
 
 func getenv(key string, defaultValue string) (value string, err error) {
@@ -49,6 +55,23 @@ func main() {
 	pods, err := clientset.CoreV1().Pods("").List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		panic(err.Error())
+	}
+
+	if config.format == "json" {
+		names := make([]string, 0)
+		for _, pod := range pods.Items {
+			if len(pod.GetName()) == 0 {
+				continue
+			}
+			names = append(names, pod.GetName())
+		}
+		output := Output{len(pods.Items), names}
+		json, err := json.Marshal(output)
+		if err != nil {
+			log.Fatalf("Error marshalling JSON, %f", err)
+		}
+		fmt.Println(string(json))
+		return
 	}
 
 	fmt.Printf("There are %d pods in the cluster\n", len(pods.Items))
