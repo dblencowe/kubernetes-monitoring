@@ -90,11 +90,11 @@ func main() {
 			names = append(names, pod.GetName())
 		}
 		output := Output{len(pods.Items), names}
-		json, err := json.Marshal(output)
+		result, err := json.Marshal(output)
 		if err != nil {
 			log.Fatalf("Error marshalling JSON, %f", err)
 		}
-		fmt.Println(string(json))
+		fmt.Println(string(result))
 		return
 	}
 
